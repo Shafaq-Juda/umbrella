@@ -73,5 +73,5 @@ elsif next_hour == "Cloudy"
 elsif next_hour == "Partly Cloudy"
   pp "You probably won't need an umbrella!"  
 elsif next_hour == "Rain"
-  pp "You probably need an umbrella!"  
+  pp "You might want to carry an umbrella!"  
 end
