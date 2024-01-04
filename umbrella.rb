@@ -1,9 +1,15 @@
-pp "Hello there!"
+line_width = 35
+
+puts "=" * line_width
+pp "Will you need an umbrella today?"
+puts "=" * line_width
+
 pp "Where are you located?"
 
 user_location = gets.chomp.gsub(" ", "%20")
-# user_location = "Chicago"
-pp user_location
+
+pp "Checking the weather at " + user_location + "...."
+
 
 maps_url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + user_location + "&key=" + ENV.fetch("GMAPS_KEY")
 
@@ -22,30 +28,50 @@ results = parsed_response.fetch("results")
 first_result = results.at(0)
 geo = first_result.fetch("geometry")
 
+# Take the lat/lng
 loc = geo.fetch("location")
+lat = loc.fetch("lat")
+lng = loc.fetch("lng")
 
-pp lat = loc.fetch("lat")
-pp lng = loc.fetch("lng")
+pp "Your coordinates are " + lat.to_s + ", " + lng.to_s + "."
 
-# I've already created a string variable above: pirate_weather_api_key
-# It contains sensitive credentials that hackers would love to steal so it is hidden for security reasons.
+# Assemble the correct URL for the pirate weather API
+pirate_weather_key = ENV.fetch("PIRATE_WEATHER_KEY")
+weather_url = "https://api.pirateweather.net/forecast/" + pirate_weather_key +"/" + lat.to_s+ "," + lng.to_s
+
+# Get it, parse it and dig out the correct temperature
 
 require "http"
 
-pirate_weather_api_key = ENV.fetch("PIRATE_WEATHER_KEY")
+resp2 = HTTP.get(weather_url)
 
-# Assemble the full URL string by adding the first part, the API token, and the last part together
-pirate_weather_url = "https://api.pirateweather.net/forecast/" + pirate_weather_api_key + "/41.8887,-87.6355"
-
-# Place a GET request to the URL
-raw_response = HTTP.get(pirate_weather_url)
+raw_response2 = resp2.to_s
 
 require "json"
 
-parsed_response = JSON.parse(raw_response)
+parsed_response2 = JSON.parse(raw_response2)
+# ppparsed_response2.keys 
+ 
+currently = parsed_response2.fetch("currently")
+current_temp = currently.fetch("temperature")
 
-currently_hash = parsed_response.fetch("currently")
+pp "It is currently " + current_temp.to_s + " F."
 
-current_temp = currently_hash.fetch("temperature")
+hourly = parsed_response2.fetch("hourly")
 
-puts "The current temperature is " + current_temp.to_s + "."
+data = hourly.fetch("data")
+
+# pp data.class #it is an array
+next_hour_weather = data.at(0)
+next_hour = next_hour_weather.fetch("summary")
+pp "Next Hour would be: " + next_hour
+
+if next_hour == "Clear"
+  pp "You probably won't need an umbrella!"
+elsif next_hour == "Cloudy"
+  pp "You probably won't need an umbrella!"
+elsif next_hour == "Partly Cloudy"
+  pp "You probably won't need an umbrella!"  
+elsif next_hour == "Rain"
+  pp "You probably need an umbrella!"  
+end
